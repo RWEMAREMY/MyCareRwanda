@@ -92,7 +92,6 @@ To make it easier for families to quickly request reliable caregivers for hospit
 
 ### Backend
 - Node.js with Express.js
-- Or Django / Laravel
 
 ### Database
 - PostgreSQL

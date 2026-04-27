@@ -1,0 +1,21 @@
+{
+  "name": "mycarerwanda",
+  "version": "1.0.0",
+  "description": "MyCareRwanda is a digital platform that helps families in Rwanda find trusted caretakers for loved ones who are ill, hospitalized, elderly, or in need of daily support.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RWEMAREMY/MyCareRwanda.git"
+  },
+  "keywords": [],
+  "author": "Rwema Remy",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RWEMAREMY/MyCareRwanda/issues"
+  },
+  "homepage": "https://github.com/RWEMAREMY/MyCareRwanda#readme"
+}
