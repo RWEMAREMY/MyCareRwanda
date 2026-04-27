@@ -4,6 +4,9 @@
   "description": "MyCareRwanda is a digital platform that helps families in Rwanda find trusted caretakers for loved ones who are ill, hospitalized, elderly, or in need of daily support.",
   "main": "index.js",
   "scripts": {
+    "build": "npm --prefix client run build",
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
