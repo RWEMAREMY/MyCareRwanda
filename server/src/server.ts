@@ -23,6 +23,16 @@ interface Caregiver {
   instantAvailable: boolean
 }
 
+interface User {
+  id: string
+  fullName: string
+  email?: string
+  phoneNumber: string
+  password: string
+  role: 'client' | 'hospital-caretaker' | 'children-caretaker' | 'admin'
+  createdAt: string
+}
+
 const careCategories: Array<{ value: CareCategory; label: string; description: string }> = [
   {
     value: 'child-care',
@@ -104,6 +114,18 @@ const caregivers: Caregiver[] = [
   },
 ]
 
+const users: User[] = [
+  {
+    id: 'usr-001',
+    fullName: 'Platform Admin',
+    email: 'admin@mycarerwanda.com',
+    phoneNumber: '0788000000',
+    password: 'admin123',
+    role: 'admin',
+    createdAt: new Date().toISOString(),
+  },
+]
+
 const isCareCategory = (value: string): value is CareCategory =>
   careCategories.some((item) => item.value === value)
 
@@ -152,6 +174,104 @@ app.get('/api/caregivers', (req, res) => {
   res.json({
     total: results.length,
     caregivers: results,
+  })
+})
+
+app.post('/api/auth/register', (req, res) => {
+  const fullName = String(req.body?.fullName || '').trim()
+  const phoneNumber = String(req.body?.phoneNumber || '').trim()
+  const password = String(req.body?.password || '').trim()
+  const confirmPassword = String(req.body?.confirmPassword || '').trim()
+  const role = String(req.body?.role || '').trim().toLowerCase() as
+    | 'client'
+    | 'hospital-caretaker'
+    | 'children-caretaker'
+
+  if (!fullName || !phoneNumber || !password || !confirmPassword || !role) {
+    return res.status(400).json({
+      message: 'fullName, phoneNumber, password, confirmPassword, and role are required fields.',
+    })
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({
+      message: 'Password must be at least 6 characters.',
+    })
+  }
+
+  if (password !== confirmPassword) {
+    return res.status(400).json({
+      message: 'Password and re-typed password do not match.',
+    })
+  }
+
+  const allowedRoles = new Set(['client', 'hospital-caretaker', 'children-caretaker'])
+  if (!allowedRoles.has(role)) {
+    return res.status(400).json({
+      message: 'Invalid role selected.',
+    })
+  }
+
+  const phoneExists = users.some((user) => user.phoneNumber === phoneNumber)
+  if (phoneExists) {
+    return res.status(409).json({
+      message: 'An account with this phone number already exists.',
+    })
+  }
+
+  const newUser: User = {
+    id: `usr-${Date.now()}`,
+    fullName,
+    phoneNumber,
+    password,
+    role,
+    createdAt: new Date().toISOString(),
+  }
+
+  users.push(newUser)
+
+  return res.status(201).json({
+    message: 'Registration successful.',
+    user: {
+      id: newUser.id,
+      fullName: newUser.fullName,
+      phoneNumber: newUser.phoneNumber,
+      role: newUser.role,
+    },
+  })
+})
+
+app.post('/api/auth/login', (req, res) => {
+  const phoneNumber = String(req.body?.phoneNumber || '').trim()
+  const password = String(req.body?.password || '').trim()
+
+  if (!phoneNumber || !password) {
+    return res.status(400).json({
+      message: 'phoneNumber and password are required fields.',
+    })
+  }
+
+  const user = users.find((item) => item.phoneNumber === phoneNumber)
+  if (!user || user.password !== password) {
+    return res.status(401).json({
+      message: 'Invalid phone number or password.',
+    })
+  }
+
+  return res.json({
+    message: 'Login successful.',
+    user: {
+      id: user.id,
+      fullName: user.fullName,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+    },
+  })
+})
+
+app.post('/api/auth/google', (_req, res) => {
+  return res.json({
+    message: 'Google login is ready on UI. OAuth integration endpoint is pending setup.',
   })
 })
 
