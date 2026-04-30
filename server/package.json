@@ -6,15 +6,19 @@
   "scripts": {
     "build": "tsc",
     "dev": "nodemon --exec ts-node ./src/server.ts",
-    "start": "node ./dist/server.js"
+    "start": "node ./dist/server.js",
+    "seeders": "ts-node ./src/seeders/index.ts",
+    "seed": "ts-node ./src/seeders/runSeeders.ts"
   },
   "dependencies": {
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pg": "^8.20.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^24.9.1",
+    "@types/pg": "^8.20.0",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"

@@ -6,18 +6,19 @@ function AuthPage() {
   const [searchParams] = useSearchParams()
   const initialTab = searchParams.get('tab') === 'register' ? 'register' : 'login'
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialTab)
-  const [loginPhoneNumber, setLoginPhoneNumber] = useState('')
+  const [loginIdentifier, setLoginIdentifier] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [registerFullName, setRegisterFullName] = useState('')
+  const [registerEmail, setRegisterEmail] = useState('')
   const [registerPhoneNumber, setRegisterPhoneNumber] = useState('')
   const [registerPassword, setRegisterPassword] = useState('')
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState('')
-  const [registerRole, setRegisterRole] = useState<'client' | 'hospital-caretaker' | 'children-caretaker'>('client')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const [currentUser, setCurrentUser] = useState<{
     id: string
     fullName: string
+    email: string
     phoneNumber: string
     role: string
   } | null>(null)
@@ -32,18 +33,26 @@ function AuthPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phoneNumber: loginPhoneNumber,
+          email: loginIdentifier.includes('@') ? loginIdentifier.trim() : undefined,
+          phoneNumber: loginIdentifier.includes('@') ? undefined : loginIdentifier.trim(),
           password: loginPassword,
         }),
       })
 
       const data = await response.json()
       if (!response.ok) {
-        setMessage(data.message || 'Login failed.')
+        const validationMessage =
+          Array.isArray(data.errors) && data.errors.length > 0
+            ? `${data.message || 'Login failed.'} ${data.errors.join(' ')}`
+            : data.message || 'Login failed.'
+        setMessage(validationMessage)
         return
       }
 
       setCurrentUser(data.user || null)
+      if (data.token?.accessToken) {
+        localStorage.setItem('authToken', data.token.accessToken)
+      }
       setMessage(data.message || 'Login successful.')
       setLoginPassword('')
     } catch {
@@ -64,22 +73,29 @@ function AuthPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fullName: registerFullName,
+          email: registerEmail,
           phoneNumber: registerPhoneNumber,
           password: registerPassword,
           confirmPassword: registerConfirmPassword,
-          role: registerRole,
         }),
       })
 
       const data = await response.json()
       if (!response.ok) {
-        setMessage(data.message || 'Registration failed.')
+        const validationMessage =
+          Array.isArray(data.errors) && data.errors.length > 0
+            ? `${data.message || 'Registration failed.'} ${data.errors.join(' ')}`
+            : data.message || 'Registration failed.'
+        setMessage(validationMessage)
         return
       }
 
-      setMessage(`${data.message || 'Registration successful.'} Please log in.`)
+      localStorage.removeItem('authToken')
+      setCurrentUser(null)
+      setMessage(`${data.message || 'Registration successful.'} Your account was created. Please sign in.`)
       setRegisterPassword('')
       setRegisterConfirmPassword('')
+      setRegisterEmail('')
       setActiveTab('login')
     } catch {
       setMessage('Unable to connect to server.')
@@ -129,14 +145,14 @@ function AuthPage() {
               {activeTab === 'login' ? (
                 <form className="auth-form" onSubmit={onLoginSubmit}>
                   <h2>Sign In</h2>
-                  <p className="auth-helper">Use your phone number and password</p>
+                  <p className="auth-helper">Use your email or phone number and password</p>
                   <label>
-                    Phone number
+                    Email or phone number
                     <input
-                      type="tel"
-                      value={loginPhoneNumber}
-                      onChange={(event) => setLoginPhoneNumber(event.target.value)}
-                      placeholder="0788xxxxxx"
+                      type="text"
+                      value={loginIdentifier}
+                      onChange={(event) => setLoginIdentifier(event.target.value)}
+                      placeholder="admin@mycarerwanda.com or 0788xxxxxx"
                       required
                     />
                   </label>
@@ -177,6 +193,16 @@ function AuthPage() {
                     />
                   </label>
                   <label>
+                    Email
+                    <input
+                      type="email"
+                      value={registerEmail}
+                      onChange={(event) => setRegisterEmail(event.target.value)}
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </label>
+                  <label>
                     Phone number
                     <input
                       type="tel"
@@ -187,29 +213,13 @@ function AuthPage() {
                     />
                   </label>
                   <label>
-                    Role
-                    <select
-                      value={registerRole}
-                      onChange={(event) =>
-                        setRegisterRole(
-                          event.target.value as 'client' | 'hospital-caretaker' | 'children-caretaker',
-                        )
-                      }
-                      required
-                    >
-                      <option value="client">Client</option>
-                      <option value="hospital-caretaker">Hospital caretaker</option>
-                      <option value="children-caretaker">Children caretaker</option>
-                    </select>
-                  </label>
-                  <label>
                     Password
                     <input
                       type="password"
                       value={registerPassword}
                       onChange={(event) => setRegisterPassword(event.target.value)}
-                      placeholder="At least 6 characters"
-                      minLength={6}
+                      placeholder="8+ chars with letters and numbers"
+                      minLength={8}
                       required
                     />
                   </label>
@@ -220,7 +230,7 @@ function AuthPage() {
                       value={registerConfirmPassword}
                       onChange={(event) => setRegisterConfirmPassword(event.target.value)}
                       placeholder="Type password again"
-                      minLength={6}
+                      minLength={8}
                       required
                     />
                   </label>
