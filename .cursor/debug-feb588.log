@@ -1,0 +1,9 @@
+{"sessionId":"feb588","runId":"run2","hypothesisId":"H6","location":"server.ts:startServer:begin","message":"startServer invoked","data":{"port":"5000"},"timestamp":1777557706849}
+{"sessionId":"feb588","runId":"run2","hypothesisId":"H6","location":"server.ts:startServer:listening","message":"http server listening","data":{"port":"5000"},"timestamp":1777557706904}
+{"sessionId":"feb588","runId":"run2","hypothesisId":"H6","location":"server.ts:startServer:error","message":"http server emitted error","data":{"errorName":"Error","errorMessage":"listen EADDRINUSE: address already in use :::5000"},"timestamp":1777557706905}
+{"sessionId":"feb588","runId":"run2","hypothesisId":"H6","location":"server.ts:startServer:begin","message":"startServer invoked","data":{"port":"5000"},"timestamp":1777557744737}
+{"sessionId":"feb588","runId":"run2","hypothesisId":"H6","location":"server.ts:startServer:listening","message":"http server listening","data":{"port":"5000"},"timestamp":1777557744776}
+{"sessionId":"feb588","runId":"run2","hypothesisId":"H6","location":"server.ts:startServer:error","message":"http server emitted error","data":{"errorName":"Error","errorMessage":"listen EADDRINUSE: address already in use :::5000"},"timestamp":1777557744776}
+{"sessionId":"feb588","runId":"run2","hypothesisId":"H6","location":"server.ts:startServer:begin","message":"startServer invoked","data":{"port":"5000"},"timestamp":1777557753678}
+{"sessionId":"feb588","runId":"run2","hypothesisId":"H6","location":"server.ts:startServer:listening","message":"http server listening","data":{"port":"5000"},"timestamp":1777557753708}
+{"sessionId":"feb588","runId":"run2","hypothesisId":"H6","location":"server.ts:startServer:error","message":"http server emitted error","data":{"errorName":"Error","errorMessage":"listen EADDRINUSE: address already in use :::5000"},"timestamp":1777557753708}
