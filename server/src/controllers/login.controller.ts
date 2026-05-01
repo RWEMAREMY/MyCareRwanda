@@ -7,9 +7,19 @@ export const loginController = async (req: Request, res: Response) => {
   const phoneNumber = normalizePhone(String(req.body?.phoneNumber || ''))
   const password = String(req.body?.password || '').trim()
 
+  const fieldErrors: Record<string, string> = {}
+
   if ((!email && !phoneNumber) || !password) {
+    if (!email && !phoneNumber) {
+      fieldErrors.identifier = 'Provide your email or phone number.'
+    }
+    if (!password) {
+      fieldErrors.password = 'Password is required.'
+    }
+
     return res.status(400).json({
       message: 'Provide email or phoneNumber, and password.',
+      fieldErrors,
     })
   }
 
@@ -17,21 +27,27 @@ export const loginController = async (req: Request, res: Response) => {
   if (!user || !verifyPassword(password, user.passwordHash, user.passwordSalt)) {
     return res.status(401).json({
       message: 'Invalid credentials.',
+      fieldErrors: {
+        identifier: 'Email/phone or password is incorrect.',
+        password: 'Email/phone or password is incorrect.',
+      },
     })
   }
 
   const token = issueAccessToken(user)
 
   return res.json({
-    message: 'Login successful.',
-    token,
-    user: {
-      id: user.id,
-      fullName: user.fullName,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      role: user.role,
-      createdAt: user.createdAt,
+    message: 'Login successful',
+    data: {
+      token,
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
     },
   })
 }

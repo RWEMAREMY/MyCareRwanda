@@ -23,6 +23,18 @@ export const findUserByEmailOrPhone = async (email: string, phoneNumber: string)
   return mapRowToUser(result.rows[0])
 }
 
+export const findUserByEmail = async (email: string) => {
+  const result = await pool.query(`SELECT * FROM users WHERE email = $1 LIMIT 1`, [email])
+  if (result.rows.length === 0) return null
+  return mapRowToUser(result.rows[0])
+}
+
+export const findUserByPhoneNumber = async (phoneNumber: string) => {
+  const result = await pool.query(`SELECT * FROM users WHERE phone_number = $1 LIMIT 1`, [phoneNumber])
+  if (result.rows.length === 0) return null
+  return mapRowToUser(result.rows[0])
+}
+
 export const createUser = async (user: User) => {
   await pool.query(
     `
@@ -52,4 +64,10 @@ export const createUser = async (user: User) => {
   )
 
   return user
+}
+
+export const findUserById = async (id: string) => {
+  const result = await pool.query(`SELECT * FROM users WHERE id = $1 LIMIT 1`, [id])
+  if (result.rows.length === 0) return null
+  return mapRowToUser(result.rows[0])
 }

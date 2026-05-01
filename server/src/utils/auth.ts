@@ -2,12 +2,15 @@ import crypto from 'crypto'
 import { User } from '../types/auth'
 
 export const authRoles = new Set(['client', 'hospital-caretaker', 'children-caretaker'])
-export const PHONE_REGEX = /^[0-9]{10,15}$/
-export const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,72}$/
+// Rwanda mobile prefixes:
+// local format: 072/073/078/079 + 7 digits
+// intl format: +25072/+25073/+25078/+25079 + 7 digits
+export const PHONE_REGEX = /^(?:\+?250|0)7(?:2|3|8|9)\d{7}$/
+export const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,10}$/
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-env'
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m'
 
 const toBase64Url = (input: Buffer | string) =>
   Buffer.from(input)
@@ -79,5 +82,36 @@ export const issueAccessToken = (user: Pick<User, 'id' | 'email' | 'phoneNumber'
     accessToken: signedToken,
     expiresAt: new Date(exp * 1000).toISOString(),
     expiresInSeconds: exp - now,
+  }
+}
+
+type AccessTokenPayload = {
+  sub: string
+  email: string
+  phoneNumber: string
+  role: User['role']
+  iat: number
+  exp: number
+}
+
+export const verifyAccessToken = (token: string): AccessTokenPayload | null => {
+  const [headerEncoded, payloadEncoded, signatureEncoded] = token.split('.')
+  if (!headerEncoded || !payloadEncoded || !signatureEncoded) return null
+
+  const unsignedToken = `${headerEncoded}.${payloadEncoded}`
+  const expectedSignature = toBase64Url(
+    crypto.createHmac('sha256', JWT_SECRET).update(unsignedToken).digest(),
+  )
+
+  if (expectedSignature !== signatureEncoded) return null
+
+  try {
+    const payloadString = Buffer.from(payloadEncoded, 'base64url').toString('utf-8')
+    const payload = JSON.parse(payloadString) as AccessTokenPayload
+    if (!payload?.sub || !payload?.exp) return null
+    if (payload.exp <= Math.floor(Date.now() / 1000)) return null
+    return payload
+  } catch {
+    return null
   }
 }
