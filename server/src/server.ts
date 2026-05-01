@@ -1,12 +1,18 @@
 import 'dotenv/config'
 import express from 'express'
-import { authLoginController, authRegisterController, googleAuthController } from './controllers/auth.controller'
+import {
+  authLoginController,
+  authMeController,
+  authRegisterController,
+  googleAuthController,
+} from './controllers/auth.controller'
 import { listCareCategoriesController, listCaregiversController } from './controllers/care.controller'
 import { instantCareRequestController } from './controllers/request.controller'
 import { ensureUsersTable } from './db/usersTable'
 
 const app = express()
-const PORT = process.env.PORT || 5000
+const PORT = Number(process.env.PORT || 5050)
+const DB_RETRY_INTERVAL_MS = Number(process.env.DB_RETRY_INTERVAL_MS || 5000)
 const allowedOrigins = (process.env.CLIENT_ORIGIN || '')
   .split(',')
   .map((origin) => origin.trim())
@@ -54,18 +60,40 @@ app.get('/api/caregivers', listCaregiversController)
 app.post('/api/auth/register', authRegisterController)
 app.post('/api/auth/login', authLoginController)
 app.post('/api/auth/google', googleAuthController)
+app.get('/api/auth/me', authMeController)
 
 app.post('/api/requests/instant-care', instantCareRequestController)
 
 const startServer = async () => {
-  await ensureUsersTable()
-
-  app.listen(PORT, () => {
+  console.log(
+    `[boot] Starting API on port ${PORT} (CLIENT_ORIGIN=${process.env.CLIENT_ORIGIN || 'not set'})`,
+  )
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server listening on http://localhost:${PORT}`)
   })
+
+  const initializeDatabase = async () => {
+    try {
+      await ensureUsersTable()
+      console.log('[boot] Database connection established and users table is ready.')
+    } catch (error) {
+      console.error('[boot] Database not ready. API stays online; retrying DB init shortly.')
+      console.error(error)
+      setTimeout(initializeDatabase, DB_RETRY_INTERVAL_MS)
+    }
+  }
+
+  void initializeDatabase()
 }
 
 startServer().catch((error) => {
-  console.error('Failed to start server:', error)
+  if (error && typeof error === 'object' && 'code' in error && (error as any).code === 'EADDRINUSE') {
+    console.error(
+      `[boot] Port ${PORT} is already in use. Set a different PORT in server/.env (for example 5050).`,
+    )
+  } else {
+    console.error('[boot] Failed to start server. Common causes: PostgreSQL not running or invalid DB env vars.')
+    console.error(error)
+  }
   process.exit(1)
 })
