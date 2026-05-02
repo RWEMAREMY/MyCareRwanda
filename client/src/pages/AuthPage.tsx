@@ -1,9 +1,46 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import myCareLogo from '../assets/mycare-logo.png'
 
 type NoticeType = 'success' | 'error' | 'info'
 type FieldErrors = Record<string, string>
+
+type GoogleCredentialResponse = {
+  credential?: string
+}
+
+const GoogleLogo = () => (
+  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 48 48">
+    <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.654 32.657 29.245 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.84 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.278 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+    <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.656 15.109 18.961 12 24 12c3.059 0 5.84 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.278 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+    <path fill="#4CAF50" d="M24 44c5.176 0 9.86-1.977 13.409-5.192l-6.192-5.238C29.14 35.091 26.715 36 24 36c-5.224 0-9.62-3.316-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
+    <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.035 12.035 0 0 1-4.086 5.571l.003-.002 6.192 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+  </svg>
+)
+
+const GoogleButtonLabel = () => (
+  <>
+    <GoogleLogo />
+    <span>Continue with Google</span>
+  </>
+)
+
+declare global {
+  interface Window {
+    google?: {
+      accounts?: {
+        id?: {
+          initialize: (config: {
+            client_id: string
+            callback: (response: GoogleCredentialResponse) => void
+          }) => void
+          prompt: (momentListener?: (notification: any) => void) => void
+        }
+      }
+    }
+  }
+}
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PHONE_REGEX = /^(?:\+?250|0)7(?:2|3|8|9)\d{7}$/
@@ -12,6 +49,7 @@ const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,72}$/
 function AuthPage() {
   const navigate = useNavigate()
   const apiBaseUrl = useMemo(() => import.meta.env.VITE_API_URL || 'http://localhost:5050', [])
+  const googleClientId = useMemo(() => import.meta.env.VITE_GOOGLE_CLIENT_ID || '', [])
   const [searchParams] = useSearchParams()
   const initialTab = searchParams.get('tab') === 'register' ? 'register' : 'login'
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialTab)
@@ -25,6 +63,9 @@ function AuthPage() {
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [notice, setNotice] = useState<{ type: NoticeType; text: string } | null>(null)
+  const googleInitializedRef = useRef(false)
+  const googleTokenResolveRef = useRef<((token: string) => void) | null>(null)
+  const googleTokenRejectRef = useRef<((error: Error) => void) | null>(null)
 
   const [loginErrors, setLoginErrors] = useState<FieldErrors>({})
   const [registerErrors, setRegisterErrors] = useState<FieldErrors>({})
@@ -244,11 +285,98 @@ function AuthPage() {
     setIsSubmitting(true)
     setNotice(null)
     try {
-      const response = await fetch(`${apiBaseUrl}/api/auth/google`, { method: 'POST' })
+      if (!googleClientId) {
+        setNotice({ type: 'error', text: 'Google login is not configured yet.' })
+        return
+      }
+
+      const rejectPendingGoogleRequest = (error: Error) => {
+        googleTokenRejectRef.current?.(error)
+        googleTokenResolveRef.current = null
+        googleTokenRejectRef.current = null
+      }
+
+      if (!window.google?.accounts?.id) {
+        await new Promise<void>((resolve, reject) => {
+          const existingScript = document.querySelector('script[data-google-identity]')
+          if (existingScript) {
+            existingScript.addEventListener('load', () => resolve(), { once: true })
+            existingScript.addEventListener('error', () => reject(new Error('Google script failed')), {
+              once: true,
+            })
+            return
+          }
+
+          const script = document.createElement('script')
+          script.src = 'https://accounts.google.com/gsi/client'
+          script.async = true
+          script.defer = true
+          script.dataset.googleIdentity = 'true'
+          script.onload = () => resolve()
+          script.onerror = () => reject(new Error('Google script failed'))
+          document.head.appendChild(script)
+        })
+      }
+
+      const googleIdentity = window.google?.accounts?.id
+      if (!googleIdentity) {
+        throw new Error('Google Sign-In unavailable')
+      }
+
+      if (!googleInitializedRef.current) {
+        googleIdentity.initialize({
+          client_id: googleClientId,
+          callback: (response: GoogleCredentialResponse) => {
+            if (response?.credential) {
+              googleTokenResolveRef.current?.(response.credential)
+            } else {
+              googleTokenRejectRef.current?.(new Error('No credential returned from Google'))
+            }
+            googleTokenResolveRef.current = null
+            googleTokenRejectRef.current = null
+          },
+        })
+        googleInitializedRef.current = true
+      }
+
+      const idToken = await new Promise<string>((resolve, reject) => {
+        googleTokenResolveRef.current = resolve
+        googleTokenRejectRef.current = reject
+
+        googleIdentity.prompt((notification: any) => {
+          if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
+            rejectPendingGoogleRequest(new Error('Google sign-in was cancelled or blocked'))
+          }
+        })
+      })
+
+      const response = await fetch(`${apiBaseUrl}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      })
       const data = await response.json()
-      setNotice({ type: 'info', text: data.message || 'Google login clicked.' })
-    } catch {
-      setNotice({ type: 'error', text: 'Unable to connect to server.' })
+      if (!response.ok) {
+        setNotice({ type: 'error', text: data?.message || 'Google login failed.' })
+        return
+      }
+
+      const token = data?.data?.token || data?.token
+      const user = data?.data?.user || data?.user
+      if (token) {
+        localStorage.setItem('token', JSON.stringify(token))
+        localStorage.setItem('authToken', token.accessToken || token)
+      }
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user))
+      }
+      toast.success(data?.message || 'Google login successful.')
+      navigate('/dashboard')
+    } catch (error: any) {
+      setNotice({
+        type: 'error',
+        text: error?.message || 'Unable to complete Google sign-in.',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -262,9 +390,7 @@ function AuthPage() {
       <main className="auth-page-main">
         <header className="topbar auth-topbar">
           <div className="logo-wrap">
-            <span className="logo-badge" aria-hidden="true">
-              MR
-            </span>
+            <img className="logo-image" src={myCareLogo} alt="MyCare Rwanda logo" />
             <div>
               <p className="logo-text auth-logo-text">MyCare Rwanda</p>
               <p className="logo-sub auth-logo-sub">Account access</p>
@@ -321,7 +447,7 @@ function AuthPage() {
                     onClick={onGoogleLogin}
                     disabled={isSubmitting}
                   >
-                    Continue with Google
+                    <GoogleButtonLabel />
                   </button>
                 </form>
               ) : (
@@ -434,6 +560,14 @@ function AuthPage() {
                   </label>
                   <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
                     {isSubmitting ? 'Please wait...' : 'Create account'}
+                  </button>
+                  <button
+                    className="btn btn-google"
+                    type="button"
+                    onClick={onGoogleLogin}
+                    disabled={isSubmitting}
+                  >
+                    <GoogleButtonLabel />
                   </button>
                 </form>
               )}

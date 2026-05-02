@@ -100,6 +100,7 @@ To make it easier for families to quickly request reliable caregivers for hospit
 
 ### Authentication
 - Email and password login
+- Google login (requires `GOOGLE_CLIENT_ID` in `server/.env` and `VITE_GOOGLE_CLIENT_ID` in `client/.env`)
 - Phone number verification
 - Admin login
 
