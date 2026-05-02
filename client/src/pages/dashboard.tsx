@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import myCareLogo from '../assets/mycare-logo.png'
 
 type SessionUser = {
   id: string
@@ -50,9 +51,7 @@ function DashboardPage() {
       <main className="auth-page-main">
         <header className="topbar auth-topbar">
           <div className="logo-wrap">
-            <span className="logo-badge" aria-hidden="true">
-              MR
-            </span>
+            <img className="logo-image" src={myCareLogo} alt="MyCare Rwanda logo" />
             <div>
               <p className="logo-text auth-logo-text">MyCare Rwanda</p>
               <p className="logo-sub auth-logo-sub">Dashboard</p>

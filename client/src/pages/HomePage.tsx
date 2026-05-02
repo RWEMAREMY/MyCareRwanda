@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+import { FormEvent, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import myCareLogo from '../assets/mycare-logo.png'
 
 const services = [
   {
@@ -55,6 +57,18 @@ const steps = [
 ]
 
 function HomePage() {
+  const navigate = useNavigate()
+  const [district, setDistrict] = useState('')
+  const [category, setCategory] = useState('')
+
+  const onSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const params = new URLSearchParams({ tab: 'register' })
+    if (district.trim()) params.set('district', district.trim())
+    if (category.trim()) params.set('category', category.trim())
+    navigate(`/auth?${params.toString()}`)
+  }
+
   return (
     <div className="page">
       <main>
@@ -62,9 +76,7 @@ function HomePage() {
           <div className="hero-overlay">
             <header className="topbar topbar-hero">
               <div className="logo-wrap">
-                <span className="logo-badge" aria-hidden="true">
-                  MR
-                </span>
+                <img className="logo-image" src={myCareLogo} alt="MyCare Rwanda logo" />
                 <div>
                   <p className="logo-text">MyCare Rwanda</p>
                   <p className="logo-sub">Ubumuntu in every booking</p>
@@ -97,15 +109,20 @@ function HomePage() {
                   when your schedule gets hectic.
                 </p>
 
-                <form className="search-card search-card-hero" aria-label="Search care">
+                <form className="search-card search-card-hero" aria-label="Search care" onSubmit={onSearchSubmit}>
                   <label>
                     District
-                    <input type="text" placeholder="Kigali, Huye, Rubavu..." />
+                    <input
+                      type="text"
+                      placeholder="Kigali, Huye, Rubavu..."
+                      value={district}
+                      onChange={(event) => setDistrict(event.target.value)}
+                    />
                   </label>
 
                   <label>
                     Care category
-                    <select defaultValue="">
+                    <select value={category} onChange={(event) => setCategory(event.target.value)}>
                       <option value="" disabled>
                         Select category
                       </option>
@@ -117,7 +134,7 @@ function HomePage() {
                     </select>
                   </label>
 
-                  <button type="button" className="btn btn-join">
+                  <button type="submit" className="btn btn-join">
                     Search
                   </button>
                 </form>
