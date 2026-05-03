@@ -27,7 +27,17 @@ const createGooglePlaceholderPhone = (googleSub: string) => `google-${googleSub}
 
 export const googleAuthController = async (req: Request, res: Response) => {
   const idToken = String(req.body?.idToken || '').trim()
-  const googleClientId = String(process.env.GOOGLE_CLIENT_ID || '').trim()
+  const allowedAudiences = Array.from(
+    new Set(
+      [
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.VITE_GOOGLE_CLIENT_ID,
+        ...(process.env.GOOGLE_CLIENT_IDS || '').split(','),
+      ]
+        .map((value) => String(value || '').trim())
+        .filter(Boolean),
+    ),
+  )
 
   if (!idToken) {
     return res.status(400).json({
@@ -50,7 +60,7 @@ export const googleAuthController = async (req: Request, res: Response) => {
     return res.status(503).json({ message: 'Unable to verify Google token right now.' })
   }
 
-  if (googleClientId && tokenInfo.aud !== googleClientId) {
+  if (allowedAudiences.length > 0 && !allowedAudiences.includes(String(tokenInfo.aud || ''))) {
     return res.status(401).json({ message: 'Google token audience mismatch.' })
   }
 
@@ -80,6 +90,10 @@ export const googleAuthController = async (req: Request, res: Response) => {
       createdAt: nowIso,
       updatedAt: nowIso,
     })
+  }
+
+  if (!user) {
+    return res.status(500).json({ message: 'Unable to create or load Google user.' })
   }
 
   const token = issueAccessToken(user)

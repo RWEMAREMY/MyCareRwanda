@@ -92,7 +92,7 @@ startServer().catch((error) => {
       `[boot] Port ${PORT} is already in use. Set a different PORT in server/.env (for example 5050).`,
     )
   } else {
-    console.error('[boot] Failed to start server. Common causes: PostgreSQL not running or invalid DB env vars.')
+    console.error('[boot] Failed to start server. Common causes: MongoDB not reachable or invalid MONGODB_URI/MONGODB_DB_NAME env vars.')
     console.error(error)
   }
   process.exit(1)
