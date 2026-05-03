@@ -84,18 +84,12 @@ function HomePage() {
               </div>
 
               <nav className="nav-links" aria-label="Primary">
-                <a href="#services">Find care</a>
-                <a href="#instant">Instant care</a>
-                <a href="#how">How it works</a>
-                <a href="#culture">Rwanda values</a>
+                <Link to="/caretakers">Caretakers</Link>
               </nav>
 
               <div className="nav-cta">
                 <Link className="btn btn-outline btn-light" to="/auth?tab=login">
                   Log in
-                </Link>
-                <Link className="btn btn-join" to="/auth?tab=register">
-                  Join now
                 </Link>
               </div>
             </header>

@@ -57,6 +57,9 @@ function DashboardPage() {
               <p className="logo-sub auth-logo-sub">Dashboard</p>
             </div>
           </div>
+          <nav className="nav-links" aria-label="Primary">
+            <Link to="/caretakers">Caretakers</Link>
+          </nav>
           <div className="nav-cta">
             <Link className="btn btn-outline" to="/">
               Home

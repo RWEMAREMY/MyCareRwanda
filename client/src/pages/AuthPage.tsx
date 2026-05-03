@@ -396,9 +396,11 @@ function AuthPage() {
               <p className="logo-sub auth-logo-sub">Account access</p>
             </div>
           </div>
-          <Link className="btn btn-outline" to="/">
-            Back to home
-          </Link>
+          <div className="nav-cta">
+            <Link className="btn btn-outline" to="/">
+              Back to home
+            </Link>
+          </div>
         </header>
 
         <section className="section auth-section">
