@@ -7,21 +7,19 @@ function AboutUsPage() {
   return (
     <div className="page auth-page">
       <main className="auth-page-main">
-        <header className="topbar auth-topbar">
+      <header className="topbar topbar-hero">
           <div className="logo-wrap">
             <img className="logo-image" src={myCareLogo} alt="MyCare Rwanda logo" />
             <div>
               <p className="logo-text auth-logo-text">MyCare Rwanda</p>
-              <p className="logo-sub auth-logo-sub">About Us</p>
+              <p className="logo-sub auth-logo-sub">Caretakers</p>
             </div>
           </div>
-
           <nav className="nav-links" aria-label="Primary">
             <Link to="/">Home</Link>
             <Link to="/caretakers">Caretakers</Link>
             <Link to="/about">About us</Link>
           </nav>
-
           <div className="nav-cta">
             <Link className="btn btn-outline" to="/auth?tab=login">
               Log in

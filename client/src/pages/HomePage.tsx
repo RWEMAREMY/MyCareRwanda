@@ -86,7 +86,7 @@ function HomePage() {
               </div>
 
               <nav className="nav-links" aria-label="Primary">
-                <Link to="/home">Home</Link>
+                <Link to="/">Home</Link>
                 <Link to="/caretakers">Caretakers</Link>
                 <Link to="/about">About us</Link>
               </nav>
