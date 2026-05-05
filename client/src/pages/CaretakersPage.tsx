@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import myCareLogo from '../assets/mycare-logo.png'
+import SiteFooter from '../components/SiteFooter'
 
 type CareSection = 'Child Care' | 'Hospital Care' | 'Home Care'
 
@@ -81,12 +82,11 @@ function CaretakersPage() {
             </div>
           </div>
           <nav className="nav-links" aria-label="Primary">
-            <Link to="/caretakers">Caretakers</Link>
+                <Link to="/home">Home</Link>
+                <Link to="/caretakers">Caretakers</Link>
+                <Link to="/about">About us</Link>
           </nav>
           <div className="nav-cta">
-            <Link className="btn btn-outline" to="/">
-              Home
-            </Link>
             <Link className="btn btn-primary" to="/auth?tab=login">
               Login
             </Link>
@@ -113,6 +113,7 @@ function CaretakersPage() {
           </div>
         </section>
       </main>
+      <SiteFooter />
     </div>
   )
 }
