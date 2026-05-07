@@ -1,17 +1,7 @@
-import { pool } from './postgres'
+import { getUsersCollection } from './mongodb'
 
 export const ensureUsersTable = async () => {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id TEXT PRIMARY KEY,
-      full_name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      phone_number TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      password_salt TEXT NOT NULL,
-      role TEXT NOT NULL,
-      created_at TIMESTAMPTZ NOT NULL,
-      updated_at TIMESTAMPTZ NOT NULL
-    );
-  `)
+  const users = await getUsersCollection()
+  await users.createIndex({ email: 1 }, { unique: true })
+  await users.createIndex({ phoneNumber: 1 }, { unique: true })
 }

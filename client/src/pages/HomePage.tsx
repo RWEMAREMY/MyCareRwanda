@@ -1,6 +1,8 @@
 import { FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import myCareLogo from '../assets/mycare-logo.png'
+import PartnersStrip from '../components/PartnersStrip'
+import SiteFooter from '../components/SiteFooter'
 
 const services = [
   {
@@ -84,18 +86,14 @@ function HomePage() {
               </div>
 
               <nav className="nav-links" aria-label="Primary">
-                <a href="#services">Find care</a>
-                <a href="#instant">Instant care</a>
-                <a href="#how">How it works</a>
-                <a href="#culture">Rwanda values</a>
+                <Link to="/">Home</Link>
+                <Link to="/caretakers">Caretakers</Link>
+                <Link to="/about">About us</Link>
               </nav>
 
               <div className="nav-cta">
                 <Link className="btn btn-outline btn-light" to="/auth?tab=login">
                   Log in
-                </Link>
-                <Link className="btn btn-join" to="/auth?tab=register">
-                  Join now
                 </Link>
               </div>
             </header>
@@ -224,12 +222,10 @@ function HomePage() {
             <p>Visual language inspired by imigongo rhythm and Rwandan landscapes.</p>
           </div>
         </section>
-      </main>
 
-      <footer className="footer">
-        <p>MyCare Rwanda</p>
-        <p>Caretaker support for hospitals, homes, children, adults, and urgent requests.</p>
-      </footer>
+        <PartnersStrip />
+      </main>
+      <SiteFooter />
     </div>
   )
 }

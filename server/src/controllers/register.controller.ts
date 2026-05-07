@@ -110,7 +110,7 @@ export const registerController = async (req: Request, res: Response) => {
   try {
     await createUser(newUser)
   } catch (error: any) {
-    if (error?.code === '23505') {
+    if (error?.code === '23505' || error?.code === 11000) {
       return res.status(409).json({
         message: 'An account with this email or phone number already exists.',
         fieldErrors: {
