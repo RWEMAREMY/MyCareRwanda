@@ -1120,12 +1120,25 @@ body {
 }
 
 .dashboard-main {
-  max-width: 1260px;
+  max-width: 100%;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-main .auth-topbar {
+  margin-bottom: 0.35rem;
 }
 
 .dashboard-shell {
   max-width: 100%;
   padding-inline: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-top: 0.35rem;
 }
 
 .dashboard-grid {
@@ -1133,6 +1146,9 @@ body {
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 0.9rem;
   width: 100%;
+  align-content: start;
+  padding: 0.9rem;
+  min-height: 0;
 }
 
 .dashboard-card {
@@ -1212,9 +1228,90 @@ body {
   background: #f5fbf8;
 }
 
+.dashboard-layout {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 0;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+}
+
+.dashboard-sidebar {
+  position: static;
+  border-right: 1px solid #d8e1dc;
+  background: #f9fcfa;
+  padding: 0.9rem;
+}
+
+.dashboard-sidebar-title {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 800;
+  color: #154b3c;
+}
+
+.dashboard-nav {
+  display: grid;
+  gap: 0.42rem;
+  margin-top: 0.65rem;
+}
+
+.dashboard-nav-link {
+  display: block;
+  text-decoration: none;
+  color: #1d5546;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: 1px solid #d8e6df;
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.58rem 0.62rem;
+}
+
+.dashboard-nav-link:hover {
+  border-color: #1e7a63;
+  background: #eefaf5;
+  color: #114335;
+}
+
+.dashboard-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border-top: 1px solid #d8e1dc;
+  background: #f9fcfa;
+  padding: 0.7rem 0.9rem;
+  color: #355246;
+  font-size: 0.86rem;
+  margin-top: auto;
+}
+
+.dashboard-footer p {
+  margin: 0;
+}
+
 @media (max-width: 920px) {
   .dashboard-card,
   .dashboard-card--hero {
     grid-column: span 12;
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sidebar {
+    border-right: none;
+    border-bottom: 1px solid #d8e1dc;
+  }
+
+  .dashboard-nav {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .dashboard-footer {
+    flex-direction: column;
   }
 }
