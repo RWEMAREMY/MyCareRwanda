@@ -1,5 +1,5 @@
 import { getUsersCollection } from '../db/mongodb'
-import { User } from '../types/auth'
+import { AuthRole, User } from '../types/auth'
 
 const withoutMongoId = (doc: (User & { _id?: unknown }) | null): User | null => {
   if (!doc) return null
@@ -41,4 +41,23 @@ export const findUserById = async (id: string) => {
   const users = await getUsersCollection()
   const result = await users.findOne({ id })
   return withoutMongoId(result as User & { _id?: unknown })
+}
+
+export const listUsers = async () => {
+  const users = await getUsersCollection()
+  const rows = await users.find({}, { projection: { _id: 0 } }).toArray()
+  return rows as User[]
+}
+
+export const updateUserRole = async (id: string, role: AuthRole) => {
+  const users = await getUsersCollection()
+  const updatedAt = new Date().toISOString()
+
+  const result = await users.findOneAndUpdate(
+    { id },
+    { $set: { role, updatedAt } },
+    { returnDocument: 'after', projection: { _id: 0 } },
+  )
+
+  return (result as User | null) || null
 }

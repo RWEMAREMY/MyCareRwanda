@@ -8,6 +8,7 @@ import {
 } from './controllers/auth.controller'
 import { listCareCategoriesController, listCaregiversController } from './controllers/care.controller'
 import { instantCareRequestController } from './controllers/request.controller'
+import { adminListUsersController, adminUpdateUserRoleController } from './controllers/admin.controller'
 import { ensureUsersTable } from './db/usersTable'
 
 const app = express()
@@ -61,6 +62,8 @@ app.post('/api/auth/register', authRegisterController)
 app.post('/api/auth/login', authLoginController)
 app.post('/api/auth/google', googleAuthController)
 app.get('/api/auth/me', authMeController)
+app.get('/api/admin/users', adminListUsersController)
+app.patch('/api/admin/users/:userId/role', adminUpdateUserRoleController)
 
 app.post('/api/requests/instant-care', instantCareRequestController)
 
