@@ -2,12 +2,16 @@ import 'dotenv/config'
 import express from 'express'
 import {
   authLoginController,
+  authChangePasswordController,
+  authForgotPasswordRequestController,
+  authForgotPasswordResetController,
   authMeController,
   authRegisterController,
   googleAuthController,
 } from './controllers/auth.controller'
 import { listCareCategoriesController, listCaregiversController } from './controllers/care.controller'
 import { instantCareRequestController } from './controllers/request.controller'
+import { adminListUsersController, adminUpdateUserRoleController } from './controllers/admin.controller'
 import { ensureUsersTable } from './db/usersTable'
 
 const app = express()
@@ -61,6 +65,11 @@ app.post('/api/auth/register', authRegisterController)
 app.post('/api/auth/login', authLoginController)
 app.post('/api/auth/google', googleAuthController)
 app.get('/api/auth/me', authMeController)
+app.post('/api/auth/change-password', authChangePasswordController)
+app.post('/api/auth/forgot-password/request-otp', authForgotPasswordRequestController)
+app.post('/api/auth/forgot-password/reset', authForgotPasswordResetController)
+app.get('/api/admin/users', adminListUsersController)
+app.patch('/api/admin/users/:userId/role', adminUpdateUserRoleController)
 
 app.post('/api/requests/instant-care', instantCareRequestController)
 

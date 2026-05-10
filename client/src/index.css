@@ -1236,6 +1236,76 @@ body {
   background: #f5fbf8;
 }
 
+.dashboard-password-form {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 560px;
+  margin-top: 0.8rem;
+}
+
+.auth-inline-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -0.2rem;
+}
+
+.auth-inline-link {
+  color: #166f5a;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.auth-inline-link:hover {
+  text-decoration: underline;
+}
+
+.dashboard-admin-toolbar {
+  margin-top: 0.75rem;
+}
+
+.dashboard-admin-table-wrap {
+  margin-top: 0.9rem;
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #d8e6df;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.dashboard-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 940px;
+}
+
+.dashboard-admin-table th,
+.dashboard-admin-table td {
+  text-align: left;
+  padding: 0.7rem;
+  border-bottom: 1px solid #e5ece8;
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+.dashboard-admin-table th {
+  background: #f3faf7;
+  color: #194d3f;
+  font-weight: 800;
+}
+
+.dashboard-admin-table tbody tr:hover {
+  background: #f9fdfb;
+}
+
+.dashboard-admin-table select {
+  border: 1px solid #ccd3cd;
+  border-radius: 10px;
+  padding: 0.6rem 0.7rem;
+  font: inherit;
+  min-width: 190px;
+}
+
 .dashboard-layout {
   width: 100%;
   display: grid;
@@ -1307,6 +1377,23 @@ body {
 
 .dashboard-footer p {
   margin: 0;
+}
+
+.dashboard-workspace {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-role-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #eefaf5;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .dashboard-card--full {
@@ -1443,5 +1530,9 @@ body {
   .quick-action-grid,
   .client-details-grid {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-admin-table {
+    min-width: 760px;
   }
 }

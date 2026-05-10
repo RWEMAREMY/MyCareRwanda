@@ -440,6 +440,11 @@ function AuthPage() {
                     />
                     {loginErrors.password ? <span className="field-error">{loginErrors.password}</span> : null}
                   </label>
+                  <div className="auth-inline-actions">
+                    <Link className="auth-inline-link" to="/auth/forgot-password">
+                      Forgot password?
+                    </Link>
+                  </div>
                   <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
                     {isSubmitting ? 'Please wait...' : 'Sign in'}
                   </button>
