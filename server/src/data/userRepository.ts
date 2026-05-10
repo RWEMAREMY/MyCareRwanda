@@ -61,3 +61,16 @@ export const updateUserRole = async (id: string, role: AuthRole) => {
 
   return (result as User | null) || null
 }
+
+export const updateUserPassword = async (id: string, passwordHash: string, passwordSalt: string) => {
+  const users = await getUsersCollection()
+  const updatedAt = new Date().toISOString()
+
+  const result = await users.findOneAndUpdate(
+    { id },
+    { $set: { passwordHash, passwordSalt, updatedAt } },
+    { returnDocument: 'after', projection: { _id: 0 } },
+  )
+
+  return (result as User | null) || null
+}

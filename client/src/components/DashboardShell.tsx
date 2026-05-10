@@ -37,6 +37,7 @@ function DashboardShell({ subtitle, roleLabel, onLogout, children }: DashboardSh
                 <Link to="/dashboard" className="dashboard-nav-link">Overview</Link>
                 <Link to="/dashboard#profile" className="dashboard-nav-link">Confidential Profile</Link>
                 <Link to="/dashboard#security" className="dashboard-nav-link">Security & Privacy</Link>
+                <Link to="/dashboard/security/change-password" className="dashboard-nav-link">Change Password</Link>
                 <Link to="/dashboard#role-zone" className="dashboard-nav-link">Role Workspace</Link>
                 <Link to="/dashboard#role-actions" className="dashboard-nav-link">Quick Actions</Link>
                 <Link to="/dashboard/admin-role-management" className="dashboard-nav-link">Role Management</Link>

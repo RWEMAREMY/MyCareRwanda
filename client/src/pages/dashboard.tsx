@@ -96,6 +96,11 @@ function DashboardPage() {
             <li>Activity and request traceability</li>
             <li>Access only for active authenticated sessions</li>
           </ul>
+          <div className="dashboard-actions">
+            <Link className="btn btn-outline" to="/dashboard/security/change-password">
+              Change Password
+            </Link>
+          </div>
         </article>
 
         {role === 'admin' && (

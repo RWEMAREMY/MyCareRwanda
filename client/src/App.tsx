@@ -5,14 +5,18 @@ import DashboardPage from './pages/dashboard'
 import CaretakersPage from './pages/CaretakersPage'
 import AboutUsPage from './pages/AboutUsPage'
 import AdminRoleManagementPage from './pages/AdminRoleManagementPage'
+import ChangePasswordPage from './pages/ChangePasswordPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/dashboard/admin-role-management" element={<AdminRoleManagementPage />} />
+      <Route path="/dashboard/security/change-password" element={<ChangePasswordPage />} />
       <Route path="/caretakers" element={<CaretakersPage />} />
       <Route path="/about" element={<AboutUsPage />} />
       <Route path="/about-us" element={<AboutUsPage />} />
