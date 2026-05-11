@@ -2,11 +2,20 @@ import { Request, Response } from 'express'
 import crypto from 'crypto'
 import { findUserById } from '../data/userRepository'
 import { createUser, findUserByEmail } from '../data/userRepository'
-import { updateUserPassword } from '../data/userRepository'
+import { findUserByPhoneNumber, updateUserPassword, updateUserProfile } from '../data/userRepository'
 import { sendPasswordResetOtpEmail } from '../utils/mailer'
 import { verifyAccessToken } from '../utils/auth'
-import { hashPassword, issueAccessToken, normalizeEmail, PASSWORD_REGEX, verifyPassword } from '../utils/auth'
+import {
+  hashPassword,
+  issueAccessToken,
+  normalizeEmail,
+  normalizePhone,
+  PASSWORD_REGEX,
+  PHONE_REGEX,
+  verifyPassword,
+} from '../utils/auth'
 import { clearPasswordResetOtp, createPasswordResetOtp, verifyPasswordResetOtp } from '../utils/passwordReset'
+import { isCloudinaryConfigured, uploadProfileImageToCloudinary } from '../utils/cloudinary'
 import { loginController } from './login.controller'
 import { registerController } from './register.controller'
 
@@ -110,6 +119,7 @@ export const googleAuthController = async (req: Request, res: Response) => {
         fullName: user.fullName,
         email: user.email,
         phoneNumber: user.phoneNumber,
+        profileImageUrl: user.profileImageUrl,
         role: user.role,
         createdAt: user.createdAt,
       },
@@ -142,8 +152,100 @@ export const authMeController = async (req: Request, res: Response) => {
       fullName: user.fullName,
       email: user.email,
       phoneNumber: user.phoneNumber,
+      profileImageUrl: user.profileImageUrl,
       role: user.role,
       createdAt: user.createdAt,
+    },
+  })
+}
+
+export const authUpdateProfileController = async (req: Request, res: Response) => {
+  const authHeader = String(req.headers.authorization || '')
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : ''
+  const fullName = String(req.body?.fullName || '').trim()
+  const phoneNumber = normalizePhone(String(req.body?.phoneNumber || ''))
+  const profileImageDataUrl = String(req.body?.profileImageDataUrl || '').trim()
+  const fieldErrors: Record<string, string> = {}
+
+  if (!token) {
+    return res.status(401).json({ message: 'Authorization token is required.' })
+  }
+
+  const payload = verifyAccessToken(token)
+  if (!payload) {
+    return res.status(401).json({ message: 'Invalid or expired token.' })
+  }
+
+  if (!fullName) fieldErrors.fullName = 'Full name is required.'
+  if (fullName.length > 120) fieldErrors.fullName = 'Full name cannot exceed 120 characters.'
+  if (!phoneNumber) fieldErrors.phoneNumber = 'Phone number is required.'
+  if (phoneNumber && !PHONE_REGEX.test(phoneNumber)) {
+    fieldErrors.phoneNumber = 'Use Rwanda prefixes 072/073/078/079 or +25072/+25073/+25078/+25079.'
+  }
+
+  if (profileImageDataUrl && !/^data:image\/(png|jpe?g|webp);base64,/i.test(profileImageDataUrl)) {
+    fieldErrors.profileImage = 'Use PNG, JPG, or WEBP images.'
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return res.status(400).json({
+      message: 'Validation failed.',
+      fieldErrors,
+    })
+  }
+
+  const user = await findUserById(payload.sub)
+  if (!user) {
+    return res.status(401).json({ message: 'User not found for token.' })
+  }
+
+  const existingByPhone = await findUserByPhoneNumber(phoneNumber)
+  if (existingByPhone && existingByPhone.id !== user.id) {
+    return res.status(409).json({
+      message: 'This phone number is already registered by another user.',
+      fieldErrors: {
+        phoneNumber: 'This phone number is already registered.',
+      },
+    })
+  }
+
+  let profileImageUrl = user.profileImageUrl
+  if (profileImageDataUrl) {
+    if (!isCloudinaryConfigured()) {
+      return res.status(500).json({
+        message: 'Profile image upload is not configured on server.',
+      })
+    }
+    try {
+      profileImageUrl = await uploadProfileImageToCloudinary(profileImageDataUrl)
+    } catch (error: any) {
+      return res.status(502).json({
+        message: error?.message || 'Unable to upload profile image.',
+      })
+    }
+  }
+
+  const updatedUser = await updateUserProfile({
+    id: user.id,
+    fullName,
+    phoneNumber,
+    profileImageUrl,
+  })
+
+  if (!updatedUser) {
+    return res.status(500).json({ message: 'Unable to update profile right now.' })
+  }
+
+  return res.json({
+    message: 'Profile updated successfully.',
+    data: {
+      id: updatedUser.id,
+      fullName: updatedUser.fullName,
+      email: updatedUser.email,
+      phoneNumber: updatedUser.phoneNumber,
+      profileImageUrl: updatedUser.profileImageUrl,
+      role: updatedUser.role,
+      createdAt: updatedUser.createdAt,
     },
   })
 }

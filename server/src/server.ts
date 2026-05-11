@@ -6,6 +6,7 @@ import {
   authForgotPasswordRequestController,
   authForgotPasswordResetController,
   authMeController,
+  authUpdateProfileController,
   authRegisterController,
   googleAuthController,
 } from './controllers/auth.controller'
@@ -33,7 +34,7 @@ const isAllowedOrigin = (origin?: string) => {
   return false
 }
 
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
 
 app.use((req, res, next) => {
   const requestOrigin = req.headers.origin
@@ -65,6 +66,7 @@ app.post('/api/auth/register', authRegisterController)
 app.post('/api/auth/login', authLoginController)
 app.post('/api/auth/google', googleAuthController)
 app.get('/api/auth/me', authMeController)
+app.patch('/api/auth/profile', authUpdateProfileController)
 app.post('/api/auth/change-password', authChangePasswordController)
 app.post('/api/auth/forgot-password/request-otp', authForgotPasswordRequestController)
 app.post('/api/auth/forgot-password/reset', authForgotPasswordResetController)
