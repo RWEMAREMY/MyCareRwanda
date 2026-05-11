@@ -5,6 +5,7 @@ export interface User {
   fullName: string
   email: string
   phoneNumber: string
+  profileImageUrl?: string
   passwordHash: string
   passwordSalt: string
   role: AuthRole

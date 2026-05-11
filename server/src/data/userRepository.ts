@@ -74,3 +74,35 @@ export const updateUserPassword = async (id: string, passwordHash: string, passw
 
   return (result as User | null) || null
 }
+
+type UpdateUserProfileInput = {
+  id: string
+  fullName: string
+  phoneNumber: string
+  profileImageUrl?: string
+}
+
+export const updateUserProfile = async ({
+  id,
+  fullName,
+  phoneNumber,
+  profileImageUrl,
+}: UpdateUserProfileInput) => {
+  const users = await getUsersCollection()
+  const updatedAt = new Date().toISOString()
+
+  await users.updateOne(
+    { id },
+    {
+      $set: {
+        fullName,
+        phoneNumber,
+        profileImageUrl,
+        updatedAt,
+      },
+    },
+  )
+
+  const refreshed = await users.findOne({ id }, { projection: { _id: 0 } })
+  return (refreshed as User | null) || null
+}

@@ -133,6 +133,7 @@ export const registerController = async (req: Request, res: Response) => {
         fullName: newUser.fullName,
         email: newUser.email,
         phoneNumber: newUser.phoneNumber,
+        profileImageUrl: newUser.profileImageUrl,
         role: newUser.role,
         createdAt: newUser.createdAt,
       },

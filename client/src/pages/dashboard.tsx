@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import myCareLogo from '../assets/mycare-logo.png'
 
 type SessionUser = {
@@ -7,6 +8,7 @@ type SessionUser = {
   fullName: string
   email: string
   phoneNumber: string
+  profileImageUrl?: string
   role: string
 }
 
@@ -54,7 +56,8 @@ const maskPhone = (phone: string) => {
 function DashboardPage() {
   const navigate = useNavigate()
   const token = useMemo(() => getStoredToken(), [])
-  const user = useMemo(() => getStoredUser(), [])
+  const apiBaseUrl = useMemo(() => import.meta.env.VITE_API_URL || 'http://localhost:5050', [])
+  const [user, setUser] = useState<SessionUser | null>(() => getStoredUser())
 
   if (!token) return <Navigate to="/auth?tab=login" replace />
 
@@ -79,6 +82,82 @@ function DashboardPage() {
   ]
 
   const [activePage, setActivePage] = useState<NavPage>('overview')
+  const [profileName, setProfileName] = useState(user?.fullName || '')
+  const [profilePhone, setProfilePhone] = useState(user?.phoneNumber || '')
+  const [profileImagePreview, setProfileImagePreview] = useState<string>(user?.profileImageUrl || '')
+  const [profileImageDataUrl, setProfileImageDataUrl] = useState('')
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const handleProfileImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.type)) {
+      toast.error('Use PNG, JPG, or WEBP images.')
+      event.target.value = ''
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image is too large. Please use an image under 5MB.')
+      event.target.value = ''
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = String(reader.result || '')
+      setProfileImageDataUrl(result)
+      setProfileImagePreview(result)
+    }
+    reader.onerror = () => {
+      toast.error('Unable to read selected image.')
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const onProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!token) return
+
+    setIsUpdatingProfile(true)
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/auth/profile`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          fullName: profileName.trim(),
+          phoneNumber: profilePhone.trim(),
+          profileImageDataUrl: profileImageDataUrl || undefined,
+        }),
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        toast.error(data?.message || 'Unable to update profile.')
+        return
+      }
+
+      const updatedUser = data?.data as SessionUser
+      if (updatedUser) {
+        setUser(updatedUser)
+        localStorage.setItem('user', JSON.stringify(updatedUser))
+        setProfileName(updatedUser.fullName || '')
+        setProfilePhone(updatedUser.phoneNumber || '')
+        setProfileImagePreview(updatedUser.profileImageUrl || '')
+        setProfileImageDataUrl('')
+      }
+      setIsEditingProfile(false)
+      toast.success(data?.message || 'Profile updated successfully.')
+    } catch {
+      toast.error('Unable to connect to server.')
+    } finally {
+      setIsUpdatingProfile(false)
+    }
+  }
 
   const renderOverview = () => (
     <>
@@ -154,6 +233,13 @@ function DashboardPage() {
       <article className="dashboard-card">
         <h3>Confidential Profile</h3>
         <div className="dashboard-profile-grid">
+          {profileImagePreview ? (
+            <img
+              src={profileImagePreview}
+              alt="Profile"
+              style={{ width: '88px', height: '88px', borderRadius: '50%', objectFit: 'cover' }}
+            />
+          ) : null}
           <p className="auth-current-user">
             Name: <strong>{userName}</strong>
           </p>
@@ -161,6 +247,65 @@ function DashboardPage() {
           <p className="auth-current-user">Phone: {maskPhone(user?.phoneNumber || '')}</p>
           <p className="auth-current-user">Internal Role: {role}</p>
         </div>
+        {!isEditingProfile ? (
+          <div className="dashboard-actions" style={{ marginTop: '1rem' }}>
+            <p className="auth-helper">Email and Internal Role are read-only.</p>
+            <button className="btn btn-primary" type="button" onClick={() => setIsEditingProfile(true)}>
+              Update Profile
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={onProfileSubmit} className="dashboard-actions" style={{ marginTop: '1rem' }}>
+            <label>
+              Name
+              <input
+                className="dashboard-input"
+                value={profileName}
+                onChange={(event) => setProfileName(event.target.value)}
+                maxLength={120}
+                required
+              />
+            </label>
+            <label>
+              Phone Number
+              <input
+                className="dashboard-input"
+                value={profilePhone}
+                onChange={(event) => setProfilePhone(event.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Profile Picture
+              <input
+                className="dashboard-input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={handleProfileImageChange}
+              />
+            </label>
+            <p className="auth-helper">Email and Internal Role are read-only.</p>
+            <div className="dashboard-actions">
+              <button className="btn btn-primary" type="submit" disabled={isUpdatingProfile}>
+                {isUpdatingProfile ? 'Saving...' : 'Save Changes'}
+              </button>
+              <button
+                className="btn btn-outline"
+                type="button"
+                onClick={() => {
+                  setProfileName(user?.fullName || '')
+                  setProfilePhone(user?.phoneNumber || '')
+                  setProfileImagePreview(user?.profileImageUrl || '')
+                  setProfileImageDataUrl('')
+                  setIsEditingProfile(false)
+                }}
+                disabled={isUpdatingProfile}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
       </article>
       <article className="dashboard-card">
         <h3>Identity Status</h3>
@@ -463,25 +608,47 @@ function DashboardPage() {
     <div className="page auth-page dashboard-page">
       <main className="auth-page-main dashboard-main">
         <header className="topbar auth-topbar">
-        <Link className="btn" to="/">
-        <div className="logo-wrap">
-           <img className="logo-image"  src={myCareLogo}  alt="MyCare Rwanda logo" />
-            <div>
-              <p className="logo-text auth-logo-text">MyCare Rwanda</p>
-              <p className="logo-sub auth-logo-sub">{roleLabel} Dashboard</p>
+          <Link className="dashboard-brand-link" to="/">
+            <div className="logo-wrap">
+              <img className="logo-image" src={myCareLogo} alt="MyCare Rwanda logo" />
+              <div>
+                <p className="logo-text auth-logo-text">MyCare Rwanda</p>
+                <p className="logo-sub auth-logo-sub">{roleLabel} Dashboard</p>
+              </div>
             </div>
-            
-          </div></Link>
-          <div className="nav-cta">
-            <button className="btn btn-primary" type="button" onClick={onLogout}>
-              Logout
-            </button>
-          </div>
+          </Link>
         </header>
 
         <section className="section auth-section dashboard-shell">
           <div className="dashboard-layout">
-            <aside className="dashboard-sidebar" aria-label="Dashboard navigation">
+            <button
+              type="button"
+              className={`dashboard-menu-toggle ${isMobileMenuOpen ? 'dashboard-menu-toggle--open' : ''}`}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="dashboard-sidebar"
+              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            >
+              <span className="dashboard-menu-toggle-bars" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </span>
+            </button>
+            {isMobileMenuOpen ? (
+              <button
+                type="button"
+                className="dashboard-menu-backdrop"
+                aria-label="Close dashboard menu"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+            ) : null}
+
+            <aside
+              id="dashboard-sidebar"
+              className={`dashboard-sidebar ${isMobileMenuOpen ? 'dashboard-sidebar--open' : ''}`}
+              aria-label="Dashboard navigation"
+            >
               <p className="dashboard-sidebar-title">Dashboard Menu</p>
               <nav className="dashboard-nav">
                 {navItems.map((item) => (
@@ -489,11 +656,17 @@ function DashboardPage() {
                     key={item.id}
                     type="button"
                     className={`dashboard-nav-link ${activePage === item.id ? 'dashboard-nav-link--active' : ''}`}
-                    onClick={() => setActivePage(item.id)}
+                    onClick={() => {
+                      setActivePage(item.id)
+                      setIsMobileMenuOpen(false)
+                    }}
                   >
                     {item.label}
                   </button>
                 ))}
+                <button className="dashboard-nav-link dashboard-nav-logout" type="button" onClick={onLogout}>
+                  Logout
+                </button>
               </nav>
             </aside>
 

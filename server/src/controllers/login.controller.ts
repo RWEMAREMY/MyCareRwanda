@@ -45,6 +45,7 @@ export const loginController = async (req: Request, res: Response) => {
         fullName: user.fullName,
         email: user.email,
         phoneNumber: user.phoneNumber,
+        profileImageUrl: user.profileImageUrl,
         role: user.role,
         createdAt: user.createdAt,
       },
