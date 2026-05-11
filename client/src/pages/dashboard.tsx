@@ -463,17 +463,16 @@ function DashboardPage() {
     <div className="page auth-page dashboard-page">
       <main className="auth-page-main dashboard-main">
         <header className="topbar auth-topbar">
-          <div className="logo-wrap">
-            <img className="logo-image" src={myCareLogo} alt="MyCare Rwanda logo" />
+        <Link className="btn" to="/">
+        <div className="logo-wrap">
+           <img className="logo-image"  src={myCareLogo}  alt="MyCare Rwanda logo" />
             <div>
               <p className="logo-text auth-logo-text">MyCare Rwanda</p>
               <p className="logo-sub auth-logo-sub">{roleLabel} Dashboard</p>
             </div>
-          </div>
+            
+          </div></Link>
           <div className="nav-cta">
-            <Link className="btn btn-outline" to="/">
-              Home
-            </Link>
             <button className="btn btn-primary" type="button" onClick={onLogout}>
               Logout
             </button>
