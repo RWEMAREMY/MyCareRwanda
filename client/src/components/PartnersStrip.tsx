@@ -1,6 +1,8 @@
 import chukLogo from '../assets/partners/chuk.png'
 import rbcLogo from '../assets/partners/rbc-white.png'
 import rssbLogo from '../assets/partners/rssb.webp'
+import minisanteLogo from '../assets/partners/minisante.jpg'
+import hLogoBlack from '../assets/partners/h-logo-black.svg'
 
 const partners = [
   {
@@ -11,7 +13,7 @@ const partners = [
   {
     name: 'MINISANTE',
     subtitle: 'Ministry of Health',
-    logoUrl: 'https://logo.clearbit.com/moh.gov.rw',
+    logoUrl: minisanteLogo,
   },
   {
     name: 'RSSB',
@@ -26,12 +28,7 @@ const partners = [
   {
     name: 'WHO',
     subtitle: 'World Health Organization Rwanda',
-    logoUrl: 'https://logo.clearbit.com/who.int',
-  },
-  {
-    name: 'UNICEF',
-    subtitle: 'UNICEF Rwanda',
-    logoUrl: 'https://logo.clearbit.com/unicef.org',
+    logoUrl: hLogoBlack,
   },
 ]
 
