@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import myCareLogo from '../assets/mycare-logo.png'
+import { useNavigate } from 'react-router-dom'
 import PartnersStrip from '../components/PartnersStrip'
+import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 
 const services = [
@@ -76,27 +76,7 @@ function HomePage() {
       <main>
         <section className="hero-banner">
           <div className="hero-overlay">
-            <header className="topbar topbar-hero">
-              <div className="logo-wrap">
-                <img className="logo-image" src={myCareLogo} alt="MyCare Rwanda logo" />
-                <div>
-                  <p className="logo-text">MyCare Rwanda</p>
-                  <p className="logo-sub">Ubumuntu in every booking</p>
-                </div>
-              </div>
-
-              <nav className="nav-links" aria-label="Primary">
-                <Link to="/">Home</Link>
-                <Link to="/caretakers">Caretakers</Link>
-                <Link to="/about">About us</Link>
-              </nav>
-
-              <div className="nav-cta">
-                <Link className="btn btn-outline btn-light" to="/auth?tab=login">
-                  Log in
-                </Link>
-              </div>
-            </header>
+            <SiteHeader />
 
             <div className="hero-stage">
               <div className="hero-copy">
