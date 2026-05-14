@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom'
-import myCareLogo from '../assets/mycare-logo.png'
+import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 
 type CareSection = 'Child Care' | 'Hospital Care' | 'Home Care'
@@ -73,25 +72,12 @@ function CaretakersPage() {
   return (
     <div className="page auth-page">
       <main className="auth-page-main caretakers-page-main">
-        <header className="topbar auth-topbar">
-          <div className="logo-wrap">
-            <img className="logo-image" src={myCareLogo} alt="MyCare Rwanda logo" />
-            <div>
-              <p className="logo-text auth-logo-text">MyCare Rwanda</p>
-              <p className="logo-sub auth-logo-sub">Caretakers</p>
-            </div>
-          </div>
-          <nav className="nav-links" aria-label="Primary">
-            <Link to="/">Home</Link>
-            <Link to="/caretakers">Caretakers</Link>
-            <Link to="/about">About us</Link>
-          </nav>
-          <div className="nav-cta">
-            <Link className="btn btn-primary" to="/auth?tab=login">
-              Login
-            </Link>
-          </div>
-        </header>
+        <SiteHeader
+          topbarClassName="auth-topbar"
+          subtitle="Caretakers"
+          loginButtonClassName="btn btn-primary"
+          loginLabel="Login"
+        />
 
         <section className="section caretakers-section">
           <div className="section-head">
