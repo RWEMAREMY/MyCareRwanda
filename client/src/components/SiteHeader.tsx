@@ -51,6 +51,7 @@ function SiteHeader({
         </button>
         <nav id="primary-nav" className="nav-links" aria-label="Primary">
           <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+          <Link to="/service" onClick={() => setIsMobileMenuOpen(false)}>Service</Link>
           <Link to="/caretakers" onClick={() => setIsMobileMenuOpen(false)}>Caretakers</Link>
           <Link to="/about" onClick={() => setIsMobileMenuOpen(false)}>About us</Link>
         </nav>
