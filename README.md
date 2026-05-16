@@ -1,181 +1,152 @@
 # MyCareRwanda
 
-MyCareRwanda is a digital platform that helps families in Rwanda find trusted caretakers for loved ones who are ill, hospitalized, elderly, or in need of daily support.
+MyCareRwanda is a caregiving platform that helps families quickly connect with trusted caretakers for hospital and home support in Rwanda.
 
-## Project Goal
+The project currently includes a React frontend and an Express + MongoDB backend, with authentication, role management, caregiver discovery, and instant care request APIs.
 
-To make it easier for families to quickly request reliable caregivers for hospital or home care, especially when they cannot be physically present all the time.
+## What This Project Does
 
-## Main Features
+- Helps families find and request caregivers based on care type and district.
+- Supports account registration and login (email/password).
+- Supports Google authentication.
+- Provides password change and forgot-password (OTP by email) flows.
+- Includes admin endpoints for listing users and updating user roles.
+- Includes seed tooling to create an initial admin user.
 
-### For Families / Clients
-- Create an account
-- Request a caretaker
-- Choose care type:
-  - Hospital caretaker
-  - Home caretaker
-  - Elderly care
-  - Night shift care
-  - Day shift care
-- Select location or hospital
-- Choose date and time
-- View available caretakers
-- See caretaker profile, experience, and ratings
-- Book or request a caretaker
-- Contact support through WhatsApp or phone
-- Make payment
-- Leave reviews
+## Tech Stack
 
-### For Caretakers
-- Create caretaker profile
-- Add personal details
-- Upload ID and required documents
-- Add experience and skills
-- Set availability
-- Accept or reject requests
-- View bookings
-- Receive payment information
+- Frontend: React + Vite + TypeScript
+- Backend: Node.js + Express + TypeScript
+- Database: MongoDB
+- Email: Nodemailer (SMTP)
+- Auth: Custom JWT-based auth + Google token verification
 
-### For Admin
-- Approve or reject caretaker profiles
-- Verify documents
-- Manage users
-- Manage bookings
-- Manage payments
-- Handle complaints
-- Replace caretaker if needed
-- View platform statistics
+## Repository Structure
 
-## Key Pages
+```text
+MyCareRwanda/
+  client/   # React application
+  server/   # Express API
+```
 
-- Home Page
-- About Us
-- Services
-- Find a Caretaker
-- Caretaker Profile
-- Booking Page
-- Login / Register
-- Dashboard
-- Admin Dashboard
-- Contact Us
-- Terms & Conditions
-- Privacy Policy
+## Prerequisites
 
-## Suggested Services
+- Node.js 18+
+- npm 9+
+- A running MongoDB instance (local or Atlas)
+- SMTP credentials for password reset emails (optional for local testing)
 
-1. Hospital Bedside Care
-2. Home Patient Care
-3. Elderly Care
-4. Post-Surgery Support
-5. Night Care Support
-6. Day Care Support
-7. Emergency Care Request
+## Installation
 
-## Trust & Safety Requirements
+1. Clone the repository.
 
-- Caretaker ID verification
-- Background check
-- Experience verification
-- Reviews and ratings
-- Emergency contact system
-- Caretaker replacement option
-- Clear pricing
-- Terms and conditions
-- Privacy protection
+```bash
+git clone <your-repo-url>
+cd MyCareRwanda
+```
 
-## Suggested Tech Stack
+2. Install client dependencies.
 
-### Frontend
-- React.js or Next.js
-- Tailwind CSS
-- HTML / CSS / JavaScript
+```bash
+npm -C client install
+```
 
-### Backend
-- Node.js with Express.js
+3. Install server dependencies.
 
-### Database
-- PostgreSQL
-- MySQL
-- Or MongoDB
+```bash
+npm -C server install
+```
 
-### Authentication
-- Email and password login
-- Google login (requires `GOOGLE_CLIENT_ID` in `server/.env` and `VITE_GOOGLE_CLIENT_ID` in `client/.env`)
-- Phone number verification
-- Admin login
+## Environment Setup
 
-### Payment Options
-- Mobile Money
-- Bank transfer
-- Cash option
-- Future integration with payment APIs
+### Server environment
 
-### Communication
-- WhatsApp button
-- SMS notifications
-- Email notifications
+Create `server/.env` from `server/.env.example` and fill real values:
 
-## User Roles
+```bash
+cp server/.env.example server/.env
+```
 
-### Client
-A person looking for a caretaker for a loved one.
+Required/important fields:
 
-### Caretaker
-A verified person offering care services.
+- `PORT` (example: `5050`)
+- `CLIENT_ORIGIN` (example: `http://localhost:5173`)
+- `MONGODB_URI`
+- `MONGODB_DB_NAME`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+- `GOOGLE_CLIENT_ID` (for Google login)
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` (for OTP email)
 
-### Admin
-The platform owner or staff managing verification, bookings, and users.
+### Client environment
 
-## Booking Flow
+Create `client/.env` (if missing) and set at least:
 
-1. User visits website
-2. User chooses care service
-3. User enters patient location or hospital
-4. User selects date and time
-5. User views caretaker options
-6. User sends booking request
-7. Admin or caretaker confirms availability
-8. User makes payment
-9. Caretaker provides service
-10. User leaves review
+```env
+VITE_API_BASE_URL=http://localhost:5050
+VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id_here
+```
 
-## MVP Version
+## Running the Project
 
-The first version should include:
+Run backend:
 
-- Landing page
-- Service list
-- Care request form
-- Caretaker registration form
-- Admin approval system
-- WhatsApp contact button
-- Simple booking management
-- Basic user dashboard
+```bash
+npm -C server run dev
+```
 
-## Future Features
+Run frontend (new terminal):
 
-- Mobile app
-- Live caretaker tracking
-- Online payments
-- Caregiver training portal
-- Hospital partnerships
-- Subscription plans
-- Emergency care hotline
-- Ratings and reviews system
-- SMS alerts
+```bash
+npm -C client run dev
+```
 
-## Brand Message
+Open the app at:
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5050`
+
+## Optional: Seed Admin User
+
+To create/update the default admin user:
+
+```bash
+npm -C server run seed
+```
+
+Default seeded admin email:
+
+- `admin@mycarerwanda.com`
+
+## Main API Endpoints
+
+- `GET /` health-style message
+- `GET /api/care-categories`
+- `GET /api/caregivers`
+- `POST /api/requests/instant-care`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/google`
+- `GET /api/auth/me`
+- `POST /api/auth/change-password`
+- `POST /api/auth/forgot-password/request-otp`
+- `POST /api/auth/forgot-password/reset`
+- `GET /api/admin/users`
+- `PATCH /api/admin/users/:userId/role`
+
+## Current Roles
+
+- `client`
+- `hospital-caretaker`
+- `children-caretaker`
+- `admin`
+
+## Notes
+
+- If SMTP is not configured, OTP emails are not sent and OTP values are logged for development.
+- Ensure `CLIENT_ORIGIN` matches your frontend URL to avoid CORS issues.
+- The project status is active development; more booking/payment workflows are planned.
+
+## Brand
 
 **MyCareRwanda — Trusted Care for Your Loved Ones**
-
-## Target Users
-
-- Families with hospitalized loved ones
-- Busy professionals
-- Elderly people needing support
-- Patients recovering at home
-- Rwandans living abroad supporting family in Rwanda
-
-## Project Status
-
-Planning / Development Stage
